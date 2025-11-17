@@ -8,6 +8,7 @@ use serde_json::{json, Value};
 use std::io;
 use std::process::Command;
 use std::sync::Arc;
+use std::thread;
 use tokio::{spawn, sync::Semaphore};
 
 #[derive(Debug, Deserialize)]
@@ -31,15 +32,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let server_url = "https://api.michijackson.xyz/search/".to_owned();
     let mut input = String::new();
-
-    let _command = Command::new("/usr/bin/aria2c")
-        .arg("--enable-rpc")
-        .arg("--disable-ipv6")
-        .arg("--rpc-listen-all")
-        .arg("--rpc-listen-port=6800")
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .spawn();
 
     eprint!("Search: ");
     io::stdin()
@@ -80,6 +72,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    let _command = Command::new("/usr/bin/aria2c")
+        .arg("--enable-rpc")
+        .arg("--disable-ipv6")
+        .arg("--rpc-listen-all")
+        .arg("--rpc-listen-port=6800")
+        //.arg("--rpc-secret=0")
+        .spawn();
+
+    thread::sleep(std::time::Duration::from_millis(500));
+
     aria2_ws(magnet.unwrap()).await;
 
     Ok(())
@@ -90,11 +92,11 @@ async fn aria2_ws(items: &str) {
         .await
         .unwrap();
     let options = TaskOptions {
-        split: Some(2),
-        extra_options: json!({"max-download-limit": "200K"})
-            .as_object()
-            .unwrap()
-            .clone(),
+        //split: Some(2),
+        //extra_options: json!({"max-download-limit": "200K"})
+        //    .as_object()
+        //    .unwrap()
+        //    .clone(),
         ..Default::default()
     };
 

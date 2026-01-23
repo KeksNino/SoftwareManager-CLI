@@ -4,7 +4,7 @@ use futures::FutureExt;
 use select::document::Document;
 use select::predicate::Name;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::io;
 use std::process::Command;
 use std::sync::Arc;
@@ -13,7 +13,7 @@ use tokio::{spawn, sync::Semaphore};
 
 #[derive(Debug, Deserialize)]
 struct Software {
-    //author: String,
+    author: String,
     title: String,
     url: String,
 }
@@ -49,10 +49,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         serde_json::from_value(data.clone()).expect("Failed to parse JSON into Software");
 
     let titles: Vec<&str> = items.iter().map(|s| s.title.as_str()).collect();
+    let author: Vec<&str> = items.iter().map(|s| s.author.as_str()).collect();
+
+    let items2: Vec<String> = titles
+        .iter()
+        .zip(author.iter())
+        .map(|(t, a)| format!("{:<80} by {}", t, a))
+        .collect();
 
     let selection = FuzzySelect::new()
         .with_prompt("Pick your software")
-        .items(&titles)
+        .items(&items2)
         .interact()
         .unwrap();
 

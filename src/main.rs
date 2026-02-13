@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "#;
     println!("{ascii}");
 
-    let server_url = "https://api.michijackson.xyz/search/".to_owned();
+    let server_url = "https://api.michijackson.xyz/search?q=".to_owned();
     let mut input = String::new();
 
     eprint!("Search: ");

@@ -76,6 +76,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
 
     let html_res = reqwest::get(&items[selection].url).await?;
+    while !html_res.status().is_success() {
+        println!("Failed to fetch the page, retrying...");
+        thread::sleep(std::time::Duration::from_millis(500));
+        let html_res = reqwest::get(&items[selection].url).await?;
+        if html_res.status().is_success() {
+            break;
+        }
+    }
     let html_text = html_res.text().await?;
     let doc = Document::from(html_text.as_str());
     let links = doc
@@ -91,7 +99,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    let _command = Command::new("/usr/bin/aria2c")
+    let command = Command::new("/usr/bin/aria2c")
         .arg("--enable-rpc")
         .arg("--disable-ipv6")
         .arg("--rpc-listen-all")
@@ -101,7 +109,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     thread::sleep(std::time::Duration::from_millis(500));
 
-    aria2_ws(magnet.unwrap(), args).await;
+    if let Some(magnet) = magnet {
+        aria2_ws(magnet, args).await;
+    } else {
+        println!("Failed to fetch magnet link");
+        command
+            .unwrap()
+            .kill()
+            .expect("Failed to kill aria2c process");
+    }
 
     Ok(())
 }

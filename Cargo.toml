@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 aria2-ws = "0.5.1"
+clap = { version = "4.6.1", features = ["derive"] }
 dialoguer = { version = "0.12.0", features = ["fuzzy-select"] }
 futures = "0.3.31"
 owo-colors = "4.3.0"

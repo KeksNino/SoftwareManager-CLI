@@ -1,10 +1,12 @@
 use aria2_ws::{Callbacks, Client, TaskOptions};
+use clap::Parser;
 use dialoguer::FuzzySelect;
 use futures::FutureExt;
 use owo_colors::OwoColorize;
 use select::document::Document;
 use select::predicate::Name;
 use serde::Deserialize;
+use serde_json::json;
 use serde_json::Value;
 use std::io;
 use std::process::Command;
@@ -19,8 +21,17 @@ struct Software {
     url: String,
 }
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, default_value_t = 0)]
+    speed_limit: i32,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args = Args::parse();
+
     let ascii = r#"
   _________       _____  __                                     _____                                             
  /   _____/ _____/ ____\/  |___  _  _______ _______   ____     /     \ _____    ____ _____     ____   ___________ 
@@ -90,21 +101,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     thread::sleep(std::time::Duration::from_millis(500));
 
-    aria2_ws(magnet.unwrap()).await;
+    aria2_ws(magnet.unwrap(), args).await;
 
     Ok(())
 }
 
-async fn aria2_ws(items: &str) {
+async fn aria2_ws(items: &str, args: Args) {
+    eprint!("{}K", args.speed_limit);
     let client = Client::connect("ws://127.0.0.1:6800/jsonrpc", None)
         .await
         .unwrap();
     let options = TaskOptions {
-        //split: Some(2),
-        //extra_options: json!({"max-download-limit": "200K"})
-        //    .as_object()
-        //    .unwrap()
-        //    .clone(),
+        split: Some(2),
+        extra_options: json!({"max-download-limit": format!("{}K", args.speed_limit)})
+            .as_object()
+            .unwrap()
+            .clone(),
         ..Default::default()
     };
 

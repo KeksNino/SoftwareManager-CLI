@@ -1,6 +1,7 @@
 use aria2_ws::{Callbacks, Client, TaskOptions};
 use dialoguer::FuzzySelect;
 use futures::FutureExt;
+use owo_colors::OwoColorize;
 use select::document::Document;
 use select::predicate::Name;
 use serde::Deserialize;
@@ -27,13 +28,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
  /        (  <_> )  |   |  |  \     /  / __ \|  | \/\  ___/  /    Y    \/ __ \|   |  \/ __ \_/ /_/  >  ___/|  | \/
 /_______  /\____/|__|   |__|   \/\_/  (____  /__|    \___  > \____|__  (____  /___|  (____  /\___  / \___  >__|   
         \/                                 \/            \/          \/     \/     \/     \//_____/      \/       
-        "#;
+        "#.yellow();
     println!("{ascii}");
 
     let server_url = "https://api.michijackson.xyz/search?q=".to_owned();
     let mut input = String::new();
 
-    eprint!("Search: ");
+    eprint!("{}", "Search: ".bright_yellow());
     io::stdin()
         .read_line(&mut input)
         .expect("failed to read input");
@@ -58,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect();
 
     let selection = FuzzySelect::new()
-        .with_prompt("Pick your software")
+        .with_prompt(format!("{}", "Pick your software".bright_yellow()))
         .items(&items2)
         .interact()
         .unwrap();
